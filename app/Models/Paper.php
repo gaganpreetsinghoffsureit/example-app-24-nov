@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 
 class Paper extends Model
 {
@@ -33,8 +34,12 @@ class Paper extends Model
     protected function images(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => is_array($value) ? json_encode($value):$value,
-            get: fn ($value) => json_decode($value),
+            set: fn ($value) => is_array($value) ? json_encode(collect(($value))->map(function ($element) {
+                return str_replace(URL(""), '', $element);
+            })->toArray()):$value,
+            get: fn ($value) => collect((json_decode($value)))->map(function ($element) {
+                return URL($element);
+            })->toArray(),
         );
     }
 
