@@ -5,18 +5,20 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class UploadController extends Controller
 {
     public function index(Request $request) : JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,jpg',
+            'file' => 'required|mimes:jpeg,png,pdf|max:5120', // Adjust the allowed file types and size as needed
         ]);
         $file = $request->file('file');
-        $filename = $file->getClientOriginalName();
+        $filename = Str::orderedUuid().".".$file->getClientOriginalExtension();
         $file->move(public_path('uploads'), $filename);
-        return ResponseHelper::success("true", $file);
+        return ResponseHelper::success(_("message.file-upload-success"), URL("uploads/".$filename));
 
     }
 }
